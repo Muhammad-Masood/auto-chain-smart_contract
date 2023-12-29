@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.22;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.22;
 
 import {Test, console2, console} from "forge-std/Test.sol";
 import {AutoChain} from "../src/AutoChain.sol";
@@ -7,7 +7,7 @@ import {AutoChain} from "../src/AutoChain.sol";
 contract AutoChainTest is Test {
     AutoChain public autoChain;
 
-    function setUp() public {
+    function setUp() public { 
         autoChain = new AutoChain();
     }
 
