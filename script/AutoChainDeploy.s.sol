@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.22;
 
 import {Script, console2} from "forge-std/Script.sol";
+import {AutoChain} from "../src/AutoChain.sol";
 
-contract CounterScript is Script {
+contract AutoChainDeployScript is Script {
     function setUp() public {}
 
     function run() public {
