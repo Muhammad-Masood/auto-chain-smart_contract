@@ -7,7 +7,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract AutoChainRental {
     address private owner;
 
-    constructor() {}
+    constructor() {
+        
+    }
 
     // view functions
 }

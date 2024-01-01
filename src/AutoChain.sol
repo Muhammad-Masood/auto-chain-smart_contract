@@ -17,7 +17,7 @@ contract AutoChain is ERC721, Ownable {
      * @param _to user address at which the nft should be minted
      */
 
-    function mint(address _to, uint256 _tokenId) external {
+    function mint(address _to, uint256 _tokenId) external onlyOwner {
         _safeMint(_to, _tokenId);
     }
 
