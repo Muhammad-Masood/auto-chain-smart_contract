@@ -8,6 +8,14 @@ Supply and Issuance: A dynamic issuance model where new tokens are created as ne
 
 Token Utility: Tokens will be used to access detailed information about each car, including rental history, maintenance received, locations visited, and ownership details.
 
+    1. **Renting the Car**: The smart contract will have functions to manage rental agreements, including setting rental terms, durations, and prices. Renters can engage these functions to initiate and complete rental transactions.
+    
+    2. **Maintenance Updates**: The smart contract will allow for updates on maintenance. Owners can input details of various maintenance activities, such as:
+    - Servicing and repairs performed.
+    - Parts replaced or upgraded.
+    - Regular maintenance checks.
+    - Any significant modifications or restorations.
+
 Integration with Smart Contracts: Smart contracts on BSC will manage vehicle rentals, updates on maintenance, and transfer of ownership.
 
 Reward Mechanisms: Ideas include loyalty programs for frequent renters, incentives for responsible maintenance, rewards for safety inspections and updates, and benefits for customer referrals or reviews.
