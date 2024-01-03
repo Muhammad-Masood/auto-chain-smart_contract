@@ -4,9 +4,11 @@ pragma solidity ^0.8.22;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AutoChain} from "./AutoChain.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract AutoChainRental is AutoChain {
-    
+    IERC20 private autoChainERC20;
+    uint256 private rewardPercentage = 5;
     struct RentalDetails{
         uint256 price;
         uint256 durationFrom;
@@ -25,7 +27,10 @@ contract AutoChainRental is AutoChain {
     error RentTransferFailed();
     error NotForRent();
 
-    constructor() {}
+    constructor(address _erc20tokenAddress) {
+        autoChainERC20 = IERC20(_erc20tokenAddress);
+        autoChainERC20.approve(address(this), autoChainERC20.totalSupply());
+    }
 
     // list car for rent
     function listCar(uint256 _tokenId, RentalDetails memory _rentalDetails) external {
@@ -35,12 +40,15 @@ contract AutoChainRental is AutoChain {
     }
 
     // rent the listed car
+    // the renter will be incentivised by 10% * amount of rent
     function rentCar(uint256 _tokenId) external {
         if(tokenIdToRentalDetails[_tokenId].price == 0 )  revert NotForRent();
-        address owner =  _requireOwned(_tokenId);
+        address currentCarOwner =  _requireOwned(_tokenId);
         uint256 rentPrice = tokenIdToRentalDetails[_tokenId].price;
-        (bool success, ) = owner.call{value: rentPrice}("");
+        (bool success, ) = currentCarOwner.call{value: rentPrice}("");
         if(!success) revert RentTransferFailed();
+        uint256 rewardAmount = (rewardPercentage * rentPrice) / 100;
+        autoChainERC20.transferFrom(owner(), msg.sender, rewardAmount);
         emit CarRented(_tokenId, msg.sender, rentPrice);
     }
 
@@ -48,5 +56,13 @@ contract AutoChainRental is AutoChain {
 
     function getCarRentalDetails(uint256 _tokenId) public view returns(RentalDetails memory){
         return tokenIdToRentalDetails[_tokenId];
+    }
+
+    function getERC20TokenAddress() public view returns (address){
+        return address(autoChainERC20);
+    }
+
+    function getRewardPercentage() public view returns (uint256){
+        return rewardPercentage;
     }
 }

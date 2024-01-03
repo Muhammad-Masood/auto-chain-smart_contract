@@ -7,11 +7,13 @@ import {AutoChainDeployScript} from "../script/AutoChainDeploy.s.sol";
 
 contract AutoChainTest is Test {
     AutoChain public autoChain;
-    address public deployer;
-    address public user = vm.addr(123);
+    address public deployer = vm.addr(123);
+    address public user = vm.addr(2233);
+
+    error OwnableUnauthorizedAccount(address account)
 
     function setUp() public {
-        AutoChainDeployScript autoChainScript = new AutoChainDeployScript(user, );
+        AutoChainDeployScript autoChainScript = new AutoChainDeployScript();
         autoChain = autoChainScript.run();
         console.log(user);
     }
@@ -27,6 +29,7 @@ contract AutoChainTest is Test {
     }
 
     function testFail_IfMinterIsNotOwner() public {
+        vm.expectRevertWith(OwnableUnauthorizedAccount.selector);
         vm.prank(user);
         autoChain.mint("token_1_uri");
     }
