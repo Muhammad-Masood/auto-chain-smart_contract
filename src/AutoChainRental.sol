@@ -19,13 +19,15 @@ contract AutoChainRental is AutoChain {
     mapping(uint256 tokenId => RentalDetails) private tokenIdToRentalDetails;
 
     // Events
-    event CarRented (uint256 indexed _tokenId, address _renter, uint256 indexed _price);
+    event CarListed (uint256 indexed _tokenId, address indexed _owner);
+    event CarRented (uint256 indexed _tokenId, address _renter, uint256 indexed _price, uint256 _reward);
 
     // Errors
 
     error IsAlreadyRented();
     error RentTransferFailed();
     error NotForRent();
+    error InvalidOwner(address);
 
     constructor(address _erc20tokenAddress) {
         autoChainERC20 = IERC20(_erc20tokenAddress);
@@ -33,15 +35,17 @@ contract AutoChainRental is AutoChain {
     }
 
     // list car for rent
-    function listCar(uint256 _tokenId, RentalDetails memory _rentalDetails) external {
-        _requireOwned(_tokenId);
+    function list(uint256 _tokenId, RentalDetails memory _rentalDetails) external {
+        address owner = _requireOwned(_tokenId);
+        if(msg.sender!=owner) revert InvalidOwner(owner);
         if(block.timestamp < tokenIdToRentalDetails[_tokenId].durationTill )  revert IsAlreadyRented();
         tokenIdToRentalDetails[_tokenId] = _rentalDetails;
+        emit CarListed(_tokenId, owner);
     }
 
     // rent the listed car
     // the renter will be incentivised by 10% * amount of rent
-    function rentCar(uint256 _tokenId) external {
+    function rent(uint256 _tokenId) external {
         if(tokenIdToRentalDetails[_tokenId].price == 0 )  revert NotForRent();
         address currentCarOwner =  _requireOwned(_tokenId);
         uint256 rentPrice = tokenIdToRentalDetails[_tokenId].price;
@@ -49,7 +53,7 @@ contract AutoChainRental is AutoChain {
         if(!success) revert RentTransferFailed();
         uint256 rewardAmount = (rewardPercentage * rentPrice) / 100;
         autoChainERC20.transferFrom(owner(), msg.sender, rewardAmount);
-        emit CarRented(_tokenId, msg.sender, rentPrice);
+        emit CarRented(_tokenId, msg.sender, rentPrice, rewardAmount);
     }
 
     // view functions
