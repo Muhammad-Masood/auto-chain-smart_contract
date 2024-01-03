@@ -8,18 +8,27 @@ import {AutoChainDeployScript} from "../script/AutoChainDeploy.s.sol";
 contract AutoChainTest is Test {
     AutoChain public autoChain;
     address public deployer;
+    address public user = vm.addr(123);
 
     function setUp() public {
-        AutoChainDeployScript autoChainDeployScript = new AutoChainDeployScript();
-        (autoChain, deployer) = autoChainDeployScript.run();
+        AutoChainDeployScript autoChainScript = new AutoChainDeployScript(user, );
+        autoChain = autoChainScript.run();
+        console.log(user);
+    }
+
+    modifier mintToken(){
+        vm.prank(deployer);
+        autoChain.mint("new_token_uri");
+        _;
     }
 
     function test_DeployerShouldBeOwner() public {
-        assert(autoChain.owner(),deployer);
+        assertEq(autoChain.owner(),deployer);
     }
 
-    function test_OnlyOwnerCanMintNewTokens() public {
-
+    function testFail_IfMinterIsNotOwner() public {
+        vm.prank(user);
+        autoChain.mint("token_1_uri");
     }
    
 }

@@ -2,15 +2,16 @@
 pragma solidity ^0.8.22;
 
 import {Script, console} from "forge-std/Script.sol";
-import {AutoChain} from "../src/AutoChain.sol";
+// import {AutoChain} from "../src/AutoChain.sol";
+import {AutoChainRental} from "../src/AutoChainRental.sol";
 
-contract AutoChainDeployScript is Script {
+contract AutoChainRentalDeployScript is Script {
 
-    function run() external returns(AutoChain) {
+    function run() external returns(AutoChainRental) {
         vm.startBroadcast();
-        AutoChain autoChain = new AutoChain();
-        console.log("Deployed AutoChain.sol on: ", address(autoChain));
+        AutoChainRental autoChainRental = new AutoChainRental();
+        console.log("Deployed AutoChainRental.sol on: ", address(autoChainRental));
         vm.stopBroadcast();
-        return (autoChain, msg.sender);
+        return autoChainRental;
     }
 }
