@@ -12,7 +12,6 @@ contract AutoChainRental is AutoChain {
         uint256 durationFrom;
         uint256 durationTill;
         string terms;
-        bool isRented;
     }
 
     mapping(uint256 tokenId => RentalDetails) private tokenIdToRentalDetails;
@@ -24,24 +23,24 @@ contract AutoChainRental is AutoChain {
 
     error IsAlreadyRented();
     error RentTransferFailed();
+    error NotForRent();
 
     constructor() {}
 
     // list car for rent
     function listCar(uint256 _tokenId, RentalDetails memory _rentalDetails) external {
         _requireOwned(_tokenId);
-        if(tokenIdToRentalDetails[_tokenId].isRented) revert IsAlreadyRented();
+        if(block.timestamp < tokenIdToRentalDetails[_tokenId].durationTill )  revert IsAlreadyRented();
         tokenIdToRentalDetails[_tokenId] = _rentalDetails;
     }
 
     // rent the listed car
     function rentCar(uint256 _tokenId) external {
-        if(tokenIdToRentalDetails[_tokenId].isRented) revert IsAlreadyRented();
+        if(tokenIdToRentalDetails[_tokenId].price == 0 )  revert NotForRent();
         address owner =  _requireOwned(_tokenId);
         uint256 rentPrice = tokenIdToRentalDetails[_tokenId].price;
         (bool success, ) = owner.call{value: rentPrice}("");
         if(!success) revert RentTransferFailed();
-        tokenIdToRentalDetails[_tokenId].isRented = true;
         emit CarRented(_tokenId, msg.sender, rentPrice);
     }
 
