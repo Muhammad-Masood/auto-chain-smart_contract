@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AutoChain} from "./AutoChain.sol";
+import {AutoChain} from "./AutoChainNFT.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract AutoChainRental is AutoChain {

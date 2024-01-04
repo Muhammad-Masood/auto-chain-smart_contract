@@ -2,20 +2,23 @@
 pragma solidity ^0.8.22;
 
 import {Test, console2, console} from "forge-std/Test.sol";
-import {AutoChain} from "../src/AutoChain.sol";
-import {AutoChainDeployScript} from "../script/AutoChainDeploy.s.sol";
+import {AutoChain} from "../src/AutoChainNFT.sol";
+import {AutoChainNFTDeployScript} from "../script/AutoChainNFTDeploy.s.sol";
 
 contract AutoChainTest is Test {
     AutoChain public autoChain;
     address public deployer = vm.addr(123);
     address public user = vm.addr(2233);
 
-    error OwnableUnauthorizedAccount(address account)
+    error OwnableUnauthorizedAccount(address account);
 
     function setUp() public {
-        AutoChainDeployScript autoChainScript = new AutoChainDeployScript();
+        vm.startPrank(deployer);
+        AutoChainNFTDeployScript autoChainScript = new AutoChainNFTDeployScript();
         autoChain = autoChainScript.run();
+        vm.stopPrank();
         console.log(user);
+        console.log(deployer);
     }
 
     modifier mintToken(){
@@ -29,9 +32,8 @@ contract AutoChainTest is Test {
     }
 
     function testFail_IfMinterIsNotOwner() public {
-        vm.expectRevertWith(OwnableUnauthorizedAccount.selector);
+        vm.expectRevert(OwnableUnauthorizedAccount.selector);
         vm.prank(user);
         autoChain.mint("token_1_uri");
     }
-   
 }

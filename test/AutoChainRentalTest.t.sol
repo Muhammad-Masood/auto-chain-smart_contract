@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import {Test, console2, console} from "forge-std/Test.sol";
-import {AutoChain} from "../src/AutoChain.sol";
+import {AutoChain} from "../src/AutoChainNFT.sol";
 import {AutoChainRental} from "../src/AutoChainRental.sol";
 import {AutoChainRentalDeployScript} from "../script/AutoChainRentalDeploy.s.sol";
 
