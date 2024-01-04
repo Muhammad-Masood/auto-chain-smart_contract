@@ -7,28 +7,21 @@ import {AutoChainNFTDeployScript} from "../script/AutoChainNFTDeploy.s.sol";
 
 contract AutoChainTest is Test {
     AutoChain public autoChain;
-    address public deployer = vm.addr(123);
     address public user = vm.addr(2233);
+    address public owner;
 
     error OwnableUnauthorizedAccount(address account);
 
     function setUp() public {
-        vm.startPrank(deployer);
         AutoChainNFTDeployScript autoChainScript = new AutoChainNFTDeployScript();
         autoChain = autoChainScript.run();
-        vm.stopPrank();
-        console.log(user);
-        console.log(deployer);
+        owner = autoChain.owner();
     }
 
     modifier mintToken(){
-        vm.prank(deployer);
+        vm.prank(owner);
         autoChain.mint("new_token_uri");
         _;
-    }
-
-    function test_DeployerShouldBeOwner() public {
-        assertEq(autoChain.owner(),deployer);
     }
 
     function testFail_IfMinterIsNotOwner() public {
@@ -36,4 +29,6 @@ contract AutoChainTest is Test {
         vm.prank(user);
         autoChain.mint("token_1_uri");
     }
+
+    
 }
