@@ -24,10 +24,24 @@ contract AutoChainTest is Test {
         _;
     }
 
-    function testFail_IfMinterIsNotOwner() public {
+    function test_RevertIfMinterIsNotOwner() public {
         vm.expectRevert(OwnableUnauthorizedAccount.selector);
         vm.prank(user);
         autoChain.mint("token_1_uri");
+    }
+
+    function test_mintShouldIncreaseTotalSupply() public mintToken {
+        uint256 totalSupply = autoChain.getTotalSupply();
+        assertEq(totalSupply,1);
+    }
+
+    function test_mintShouldSetTokenURI() public mintToken {
+        uint256 tokenId = 0;
+        uint256 tokenURI = autoChain.tokenURI(tokenId);
+        assertEq(tokenURI,"token_1_uri");
+        // should revert if passed wrong token Id
+        expectRevert();
+        tokenId = autoChain.tokenURI(1);
     }
 
     
