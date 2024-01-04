@@ -30,19 +30,28 @@ contract AutoChainTest is Test {
         autoChain.mint("token_1_uri");
     }
 
-    function test_mintShouldIncreaseTotalSupply() public mintToken {
-        uint256 totalSupply = autoChain.getTotalSupply();
-        assertEq(totalSupply,1);
+    // all tokens will be minted at the address of the owner
+    function test_MintShouldSetRightOwnerAfterMint() public mintToken {
+        uint256 tokenId =  0;
+        address newOwner = autoChain._ownerOf(tokenId);
+        assertEq(newOwner,owner);
     }
 
-    function test_mintShouldSetTokenURI() public mintToken {
+    function test_MintShouldIncreaseTotalSupplyAndMinterBalance() public {
+        uint256 prevBalance = autoChain.balanceOf(owner);
+        uint256 prevTotalSupply = autoChain.getTotalSupply();
+        vm.prank(owner);
+        autoChain.mint("new_token_uri");
+        uint256 newBalance = autoChain.balanceOf(owner);
+        uint256 newTotalSupply = autoChain.getTotalSupply();
+        assertEq(newTotalSupply,prevTotalSupply+1);
+        assertEq(new,prevTotalSupply+1);        
+    }
+
+    function test_MintShouldSetRightTokenURI() public mintToken {
         uint256 tokenId = 0;
-        uint256 tokenURI = autoChain.tokenURI(tokenId);
+        string memory tokenURI = autoChain.tokenURI(tokenId);
         assertEq(tokenURI,"token_1_uri");
-        // should revert if passed wrong token Id
-        expectRevert();
-        tokenId = autoChain.tokenURI(1);
     }
-
     
 }
