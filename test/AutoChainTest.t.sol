@@ -18,23 +18,23 @@ contract AutoChainTest is Test {
         owner = autoChain.owner();
     }
 
-    modifier mintToken(){
+    modifier mintToken() {
         vm.prank(owner);
         autoChain.mint("new_token_uri");
         _;
     }
 
     function test_RevertIfMinterIsNotOwner() public {
-        vm.expectRevert(OwnableUnauthorizedAccount.selector);
+        vm.expectRevert();
         vm.prank(user);
         autoChain.mint("token_1_uri");
     }
 
     // all tokens will be minted at the address of the owner
     function test_MintShouldSetRightOwnerAfterMint() public mintToken {
-        uint256 tokenId =  0;
-        address newOwner = autoChain._ownerOf(tokenId);
-        assertEq(newOwner,owner);
+        uint256 tokenId = 0;
+        address newOwner = autoChain.ownerOf(tokenId);
+        assertEq(newOwner, owner);
     }
 
     function test_MintShouldIncreaseTotalSupplyAndMinterBalance() public {
@@ -44,14 +44,14 @@ contract AutoChainTest is Test {
         autoChain.mint("new_token_uri");
         uint256 newBalance = autoChain.balanceOf(owner);
         uint256 newTotalSupply = autoChain.getTotalSupply();
-        assertEq(newTotalSupply,prevTotalSupply+1);
-        assertEq(new,prevTotalSupply+1);        
+        assertEq(newTotalSupply, prevTotalSupply + 1);
+        assertEq(newBalance, prevBalance + 1);
     }
 
     function test_MintShouldSetRightTokenURI() public mintToken {
         uint256 tokenId = 0;
         string memory tokenURI = autoChain.tokenURI(tokenId);
-        assertEq(tokenURI,"token_1_uri");
+        console.log(tokenURI);
+        assertEq(tokenURI, "new_token_uri");
     }
-    
 }

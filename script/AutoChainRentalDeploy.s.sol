@@ -14,7 +14,7 @@ contract AutoChainRentalDeployScript is Script {
     function run() external returns(AutoChainRental) {
         vm.startBroadcast();
         vm.startPrank(owner);
-        AutoChain autoChain = new AutoChain(totalSupply); // ERC20 token
+        AutoChain autoChain = new AutoChain(); // ERC20 token
         AutoChainRental autoChainRental = new AutoChainRental(address(autoChain));
         vm.stopPrank();
         console.log("Deployed AutoChainRental.sol on: ", address(autoChainRental));
