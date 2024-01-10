@@ -8,6 +8,7 @@ contract AutoChain is ERC721, Ownable {
     uint256 private totalSupply;
     mapping(uint256 tokenId => string[]) private carToMaintenanceHistory;
     mapping(uint256 tokenId => string) private tokenIdToURI;
+    mapping(address user => uint256[] tokenIds) private addressToOwnedTokenIds;
 
     constructor() ERC721("AutoChain", "AC") Ownable(msg.sender) {}
 
@@ -19,7 +20,8 @@ contract AutoChain is ERC721, Ownable {
     function mint(string memory _tokenURI) external onlyOwner {
         _safeMint(msg.sender, totalSupply);
         tokenIdToURI[totalSupply] = _tokenURI;
-        totalSupply+=1;
+        addressToOwnedTokenIds[msg.sender].push(totalSupply);
+        totalSupply += 1;
     }
 
     /**
@@ -33,25 +35,35 @@ contract AutoChain is ERC721, Ownable {
         tokenIdToURI[_tokenId] = "";
     }
 
-    function updateMaintenanceHistory(uint256 _tokenId, string memory _update) external {
+    function updateMaintenanceHistory(
+        uint256 _tokenId,
+        string memory _update
+    ) external {
         carToMaintenanceHistory[_tokenId].push(_update);
     }
 
     // public functions
 
-    function getMaintenanceHistory(uint256 _tokenId) public view returns (string[] memory maintenanceHistory) {
+    function getMaintenanceHistory(
+        uint256 _tokenId
+    ) public view returns (string[] memory maintenanceHistory) {
         return carToMaintenanceHistory[_tokenId];
     }
 
-    function getTotalSupply() public view returns(uint256){
+    function getTotalSupply() public view returns (uint256) {
         return totalSupply;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory) {
         _requireOwned(tokenId);
         return tokenIdToURI[tokenId];
     }
 
-    // internal functions
+    function ownedTokenIds() public view returns (uint256[] memory) {
+        return addressToOwnedTokenIds[msg.sender];
+    }
 
+    // internal functions
 }
