@@ -10,17 +10,20 @@ contract AutoChain is ERC721, Ownable {
     mapping(uint256 tokenId => string) private tokenIdToURI;
     mapping(address user => uint256[] tokenIds) private addressToOwnedTokenIds;
 
-    constructor() ERC721("AutoChain", "AC") Ownable(msg.sender) {}
+    constructor() ERC721("AutoChain", "AC") Ownable(payable(msg.sender)) {}
 
     /**
      * launch new car or mint new token
      * @param _tokenURI uri of the token to mint
      */
 
-    function mint(string memory _tokenURI) external onlyOwner {
-        _safeMint(msg.sender, totalSupply);
+    function mint(
+        string memory _tokenURI,
+        address _address
+    ) external onlyOwner {
+        _safeMint(_address, totalSupply);
         tokenIdToURI[totalSupply] = _tokenURI;
-        addressToOwnedTokenIds[msg.sender].push(totalSupply);
+        addressToOwnedTokenIds[_address].push(totalSupply);
         totalSupply += 1;
     }
 

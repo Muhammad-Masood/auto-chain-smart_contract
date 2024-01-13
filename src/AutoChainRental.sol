@@ -8,8 +8,10 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 contract AutoChainRental is AutoChain {
     IERC20 private autoChainERC20;
-    uint256 private rewardPercentage = 5;
-    struct RentalDetails{
+    uint256 private rewardPercentage = 10;
+    uint256[] private vehiclesForRent;
+
+    struct RentalDetails {
         uint256 price;
         uint256 durationFrom;
         uint256 durationTill;
@@ -17,10 +19,19 @@ contract AutoChainRental is AutoChain {
     }
 
     mapping(uint256 tokenId => RentalDetails) private tokenIdToRentalDetails;
+    mapping(address user => uint256[] tokenIdsRented)
+        private addressToRentedTokenIds;
+    mapping(address user => uint256[] tokenIdsListed)
+        private addressToListedTokenIds;
 
     // Events
-    event CarListed (uint256 indexed _tokenId, address indexed _owner);
-    event CarRented (uint256 indexed _tokenId, address _renter, uint256 indexed _price, uint256 _reward);
+    event CarListed(uint256 indexed _tokenId, address indexed _owner);
+    event CarRented(
+        uint256 indexed _tokenId,
+        address _renter,
+        uint256 indexed _price,
+        uint256 _reward
+    );
 
     // Errors
 
@@ -31,42 +42,68 @@ contract AutoChainRental is AutoChain {
 
     constructor(address _erc20tokenAddress) {
         autoChainERC20 = IERC20(_erc20tokenAddress);
-        autoChainERC20.approve(address(this), autoChainERC20.totalSupply());
+        // autoChainERC20.approve(address(this), autoChainERC20.totalSupply());
     }
 
     // list car for rent
-    function list(uint256 _tokenId, RentalDetails memory _rentalDetails) external {
+    function addListing(
+        uint256 _tokenId,
+        RentalDetails memory _rentalDetails
+    ) external {
         address owner = _requireOwned(_tokenId);
-        if(msg.sender!=owner) revert InvalidOwner(owner);
-        if(block.timestamp < tokenIdToRentalDetails[_tokenId].durationTill )  revert IsAlreadyRented();
+        if (msg.sender != owner) revert InvalidOwner(owner);
+        if (block.timestamp < tokenIdToRentalDetails[_tokenId].durationTill)
+            revert IsAlreadyRented();
         tokenIdToRentalDetails[_tokenId] = _rentalDetails;
+        vehiclesForRent.push(_tokenId);
+        addressToListedTokenIds[owner].push(_tokenId);
         emit CarListed(_tokenId, owner);
     }
 
     // rent the listed car
     // the renter will be incentivised by 10% * amount of rent
-    function rent(uint256 _tokenId) external {
-        if(tokenIdToRentalDetails[_tokenId].price == 0 )  revert NotForRent();
-        address currentCarOwner =  _requireOwned(_tokenId);
+    function rent(uint256 _tokenId) external payable {
         uint256 rentPrice = tokenIdToRentalDetails[_tokenId].price;
+        if (rentPrice == 0) revert NotForRent();
+        address currentCarOwner = _requireOwned(_tokenId);
         (bool success, ) = currentCarOwner.call{value: rentPrice}("");
-        if(!success) revert RentTransferFailed();
+        if (!success) revert RentTransferFailed();
         uint256 rewardAmount = (rewardPercentage * rentPrice) / 100;
         autoChainERC20.transferFrom(owner(), msg.sender, rewardAmount);
+        delete vehiclesForRent[_tokenId];
+        addressToRentedTokenIds[msg.sender].push(_tokenId);
         emit CarRented(_tokenId, msg.sender, rentPrice, rewardAmount);
     }
 
     // view functions
 
-    function getCarRentalDetails(uint256 _tokenId) public view returns(RentalDetails memory){
+    function carRentalDetails(
+        uint256 _tokenId
+    ) public view returns (RentalDetails memory) {
         return tokenIdToRentalDetails[_tokenId];
     }
 
-    function getERC20TokenAddress() public view returns (address){
+    function erc20TokenAddress() public view returns (address) {
         return address(autoChainERC20);
     }
 
-    function getRewardPercentage() public view returns (uint256){
+    function getRewardPercentage() public view returns (uint256) {
         return rewardPercentage;
+    }
+
+    function availableVehiclesForRent() public view returns (uint256[] memory) {
+        return vehiclesForRent;
+    }
+
+    function tokenIdsListed(
+        address user
+    ) public view returns (uint256[] memory) {
+        return addressToListedTokenIds[user];
+    }
+
+    function tokenIdsRented(
+        address user
+    ) public view returns (uint256[] memory) {
+        return addressToRentedTokenIds[user];
     }
 }

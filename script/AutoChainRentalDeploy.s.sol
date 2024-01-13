@@ -11,14 +11,13 @@ contract AutoChainRentalDeployScript is Script {
     address public owner = vm.addr(123);
     uint256 public totalSupply = 1000*10**18; 
 
-    function run() external returns(AutoChainRental) {
+    function run() external returns(AutoChainRental, AutoChain) {
         vm.startBroadcast();
-        vm.startPrank(owner);
         AutoChain autoChain = new AutoChain(); // ERC20 token
         AutoChainRental autoChainRental = new AutoChainRental(address(autoChain));
-        vm.stopPrank();
-        console.log("Deployed AutoChainRental.sol on: ", address(autoChainRental));
+        autoChain.approve(address(autoChainRental), totalSupply);
+        console.log("Deployed AutoChainRental.sol on: ", address(autoChainRental), "owner ", autoChainRental.owner());
         vm.stopBroadcast();
-        return autoChainRental;
+        return (autoChainRental,autoChain);
     }
 }
