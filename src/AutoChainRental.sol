@@ -9,7 +9,11 @@ import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 contract AutoChainRental is AutoChain {
     IERC20 private autoChainERC20;
     uint256 private rewardPercentage = 10;
-    uint256[] private vehiclesForRent;
+    enum RentStatus {
+        None,
+        Listed,
+        Rented
+    }
 
     struct RentalDetails {
         uint256 price;
@@ -23,6 +27,8 @@ contract AutoChainRental is AutoChain {
         private addressToRentedTokenIds;
     mapping(address user => uint256[] tokenIdsListed)
         private addressToListedTokenIds;
+    mapping(uint256 tokenId => RentStatus rentStatus)
+        private tokenIdToRentStatus;
 
     // Events
     event CarListed(uint256 indexed _tokenId, address indexed _owner);
@@ -55,7 +61,7 @@ contract AutoChainRental is AutoChain {
         if (block.timestamp < tokenIdToRentalDetails[_tokenId].durationTill)
             revert IsAlreadyRented();
         tokenIdToRentalDetails[_tokenId] = _rentalDetails;
-        vehiclesForRent.push(_tokenId);
+        tokenIdToRentStatus[_tokenId] = RentStatus.Listed;
         addressToListedTokenIds[owner].push(_tokenId);
         emit CarListed(_tokenId, owner);
     }
@@ -70,7 +76,7 @@ contract AutoChainRental is AutoChain {
         if (!success) revert RentTransferFailed();
         uint256 rewardAmount = (rewardPercentage * rentPrice) / 100;
         autoChainERC20.transferFrom(owner(), msg.sender, rewardAmount);
-        delete vehiclesForRent[_tokenId];
+        tokenIdToRentStatus[_tokenId] = RentStatus.Rented;
         addressToRentedTokenIds[msg.sender].push(_tokenId);
         emit CarRented(_tokenId, msg.sender, rentPrice, rewardAmount);
     }
@@ -91,8 +97,8 @@ contract AutoChainRental is AutoChain {
         return rewardPercentage;
     }
 
-    function availableVehiclesForRent() public view returns (uint256[] memory) {
-        return vehiclesForRent;
+    function rentStatus(uint256 _tokenId) public view returns (RentStatus) {
+        return tokenIdToRentStatus[_tokenId];
     }
 
     function tokenIdsListed(

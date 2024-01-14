@@ -20,14 +20,14 @@ contract AutoChainTest is Test {
 
     modifier mintToken() {
         vm.prank(owner);
-        autoChain.mint("new_token_uri");
+        autoChain.mint("new_token_uri", owner);
         _;
     }
 
     function test_RevertIfMinterIsNotOwner() public {
         vm.expectRevert();
         vm.prank(user);
-        autoChain.mint("token_1_uri");
+        autoChain.mint("token_1_uri", owner);
     }
 
     // all tokens will be minted at the address of the owner
@@ -41,7 +41,7 @@ contract AutoChainTest is Test {
         uint256 prevBalance = autoChain.balanceOf(owner);
         uint256 prevTotalSupply = autoChain.getTotalSupply();
         vm.prank(owner);
-        autoChain.mint("new_token_uri");
+        autoChain.mint("new_token_uri", msg.sender);
         uint256 newBalance = autoChain.balanceOf(owner);
         uint256 newTotalSupply = autoChain.getTotalSupply();
         assertEq(newTotalSupply, prevTotalSupply + 1);
